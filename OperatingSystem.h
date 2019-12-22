@@ -24,7 +24,8 @@ namespace OS {
 		Memory memory;
 		Disk disk;
 		unsigned int pf;			//已完成进程数
-		unsigned int time; ;//运行时间
+		unsigned int time; //运行时间
+		void pagedispatch(int n);
 	};
 
 	OperatingSystem::OperatingSystem()
@@ -83,10 +84,25 @@ namespace OS {
 		//cout <<"当前时间"<< time << endl;
 		if (!queue[0].empty())
 		{
-			
-			
 			queue[0].front().runtime++;
-			
+			//访问页面
+			unsigned int framenumber;
+			if (queue[0].front().pagetable->tryGet(queue[0].front().page,framenumber))
+			{
+				queue[0].front().page = memory.block[queue[0].front().pagetable->get(queue[0].front().page)];
+			}
+			else
+			{
+				if (queue[0].front().frames.empty())
+				{
+					queue[0].front().frames.push(queue[0].front().pagetable->returnHead());
+				}
+				queue[0].front().pagetable->insert(queue[0].front().page,queue[0].front().frames.front());
+				queue[0].front().frames.pop();
+				memory.block[queue[0].front().pagetable->get(queue[0].front().page)] = disk.disk[queue[0].front().physicalAddress + queue[0].front().page];
+				queue[0].front().pagetable->dumpDebug(std::cout << "--> 页面置换" << std::endl);
+				queue[0].front().page = memory.block[queue[0].front().pagetable->get(queue[0].front().page)];
+			}
 			
 			
 			if (queue[0].front().needtime== queue[0].front().runtime)
@@ -111,7 +127,8 @@ namespace OS {
 		{
 			
 			queue[1].front().runtime++;
-			//tmp.needtime--;
+			//访问页面
+			pagedispatch(1);
 			
 			if (queue[1].front().needtime == queue[1].front().runtime)
 			{
@@ -136,7 +153,8 @@ namespace OS {
 		{
 			
 			queue[2].front().runtime++;
-			//tmp.needtime--;
+			//访问页面
+			pagedispatch(2);
 			
 			queue[2].front().rrtmp--;
 			if (queue[2].front().needtime == queue[2].front().runtime)
@@ -158,6 +176,28 @@ namespace OS {
 		}
 
 		return 0;
+	}
+
+	inline void OperatingSystem::pagedispatch(int n)
+	{
+		//访问页面
+		unsigned int framenumber;
+		if (queue[n].front().pagetable->tryGet(queue[n].front().page, framenumber))
+		{
+			queue[n].front().page = memory.block[queue[n].front().pagetable->get(queue[n].front().page)];
+		}
+		else
+		{
+			if (queue[n].front().frames.empty())
+			{
+				queue[n].front().frames.push(queue[n].front().pagetable->returnHead());
+			}
+			queue[n].front().pagetable->insert(queue[n].front().page, queue[n].front().frames.front());
+			queue[n].front().frames.pop();
+			memory.block[queue[n].front().pagetable->get(queue[n].front().page)] = disk.disk[queue[n].front().physicalAddress + queue[n].front().page];
+			queue[n].front().pagetable->dumpDebug(std::cout << "--> 页面置换" << std::endl);
+			queue[n].front().page = memory.block[queue[n].front().pagetable->get(queue[n].front().page)];
+		}
 	}
 
 }

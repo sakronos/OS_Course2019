@@ -17,13 +17,14 @@ public:
     unsigned int rrtmp;			//RR剩余时间
     int physicalAddress;        //磁盘地址
     int frameNum;               //磁盘块数
-    Cache<int, int> *pagetable; //页表
-    queue<int> frames;          //分配的物理地址
+    Cache<unsigned int, unsigned int> *pagetable; //页表
+    queue<int> frames;          //分配的内存地址
+    
 
     explicit PCB(unsigned int pid=1, unsigned int st=0,  unsigned int nt=0, int pa=0,int frameNum=0) :PID(pid),starttime(st),needtime(nt),physicalAddress(pa),frameNum(frameNum)
     {
         rrtmp = 0;
-        pagetable = new Cache<int, int>(4, 0);
+        pagetable = new Cache<unsigned int, unsigned int>(4, 0);
         runtime = 0;
         endtime = 0;
         page = 0;

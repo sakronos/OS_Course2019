@@ -7,6 +7,7 @@ public:
 	Memory();
 	~Memory();
 	unsigned int memory[80] = {0};
+	int block[80] = { -1 };
 	
 private:
 

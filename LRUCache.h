@@ -7,6 +7,7 @@
 #include <map>
 #include <iostream>
 #include <exception>
+#include <queue>
 
 namespace OS {
 	/**
@@ -188,21 +189,33 @@ namespace OS {
 				m_keys.clear();
 			}
 			void insert(const Key& key, const Value& value) {
+
 				ScopedLock scoped(m_lock);
+
 				typename MapType::iterator iter = m_cache.find(key);
+
 				if (iter != m_cache.end()) {
+
 					iter->second->value = value;
+
 					m_keys.remove(iter->second);
+
 					m_keys.push(iter->second);
+
 				}
 				else {
-					Node<Key, Value>* n = new Node<Key, Value>(key, value);
-					m_cache[key] = n;
-					m_keys.push(n);
-					prune();
-				}
 
+					Node<Key, Value>* n = new Node<Key, Value>(key, value);
+
+					m_cache[key] = n;
+
+					m_keys.push(n);
+
+					prune();
+
+				}
 			}
+
 			bool tryGet(const Key& key, Value& value) {
 				ScopedLock scoped(m_lock);
 				typename MapType::iterator iter = m_cache.find(key);
@@ -247,11 +260,14 @@ namespace OS {
 			void dumpDebug(std::ostream& os) const {
 				ScopedLock scoped(m_lock);
 				std::cout << "Cache Size : " << m_cache.size() << " (max:" << m_maxSize
-					<< ") (elasticity: " << m_elasticity << ")" << std::endl;
+					<< ") " << std::endl;
 				for (Node<Key, Value>* node = m_keys.head; node != NULL; node = node->next) {
 					printVisitor(*node);
 				}
 
+			}
+			Value returnHead() {
+				return m_keys.head->value;
 			}
 		protected:
 			size_t prune() {
@@ -259,6 +275,8 @@ namespace OS {
 					size_t count = 0;
 					while (m_cache.size() > m_maxSize) {
 						Node<Key, Value>* n = m_keys.pop();
+						//
+						
 						m_cache.erase(n->key);
 						delete n;
 						count++;
