@@ -84,7 +84,9 @@ namespace OS {
 		//cout <<"当前时间"<< time << endl;
 		if (!queue[0].empty())
 		{
+			cout << "进程" << queue[0].front().PID << "正在运行" <<",调用逻辑页："<<queue[0].front().page<< endl;
 			queue[0].front().runtime++;
+
 			//访问页面
 			unsigned int framenumber;
 			if (queue[0].front().pagetable->tryGet(queue[0].front().page,framenumber))
@@ -100,7 +102,7 @@ namespace OS {
 				queue[0].front().pagetable->insert(queue[0].front().page,queue[0].front().frames.front());
 				queue[0].front().frames.pop();
 				memory.block[queue[0].front().pagetable->get(queue[0].front().page)] = disk.disk[queue[0].front().physicalAddress + queue[0].front().page];
-				queue[0].front().pagetable->dumpDebug(std::cout << "--> 页面置换" << std::endl);
+				queue[0].front().pagetable->dumpDebug(std::cout << "--> 缺页中断" << std::endl);
 				queue[0].front().page = memory.block[queue[0].front().pagetable->get(queue[0].front().page)];
 			}
 			
@@ -118,14 +120,14 @@ namespace OS {
 				PCB tmp = queue[0].front();
 				queue[0].pop();
 				queue[1].push(tmp);
-				cout << "进程" << tmp.PID << "进入第2队列" << endl;
+				cout << "进程" << tmp.PID << "进入第2队列" << ",运行时间" << tmp.runtime<< endl;
 			}
 			
 			return 0;
 		}
 		if (!queue[1].empty())
 		{
-			
+			cout << "进程" << queue[1].front().PID << "正在运行" << ",调用逻辑页：" << queue[1].front().page << endl;
 			queue[1].front().runtime++;
 			//访问页面
 			pagedispatch(1);
@@ -144,14 +146,14 @@ namespace OS {
 				tmp.rrtmp = rrslice;
 				queue[1].pop();
 				queue[2].push(tmp);
-				cout << "进程" << tmp.PID << "进入第3队列" << endl;
+				cout << "进程" << tmp.PID << "进入第3队列" << ",运行时间" << tmp.runtime << endl;
 			}
 			
 			return 0;
 		}
 		if (!queue[2].empty())
 		{
-			
+			cout << "进程" << queue[2].front().PID << "正在运行" << ",调用逻辑页：" << queue[2].front().page << endl;
 			queue[2].front().runtime++;
 			//访问页面
 			pagedispatch(2);
@@ -195,7 +197,7 @@ namespace OS {
 			queue[n].front().pagetable->insert(queue[n].front().page, queue[n].front().frames.front());
 			queue[n].front().frames.pop();
 			memory.block[queue[n].front().pagetable->get(queue[n].front().page)] = disk.disk[queue[n].front().physicalAddress + queue[n].front().page];
-			queue[n].front().pagetable->dumpDebug(std::cout << "--> 页面置换" << std::endl);
+			queue[n].front().pagetable->dumpDebug(std::cout << "--> 缺页中断" << std::endl);
 			queue[n].front().page = memory.block[queue[n].front().pagetable->get(queue[n].front().page)];
 		}
 	}

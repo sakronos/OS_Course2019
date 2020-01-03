@@ -259,8 +259,7 @@ namespace OS {
 
 			void dumpDebug(std::ostream& os) const {
 				ScopedLock scoped(m_lock);
-				std::cout << "Cache Size : " << m_cache.size() << " (max:" << m_maxSize
-					<< ") " << std::endl;
+				std::cout << "าณฑํ : " << m_cache.size() <<  std::endl;
 				for (Node<Key, Value>* node = m_keys.head; node != NULL; node = node->next) {
 					printVisitor(*node);
 				}
