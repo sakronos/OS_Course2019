@@ -18,7 +18,7 @@ public:
     int physicalAddress;        //磁盘地址
     int frameNum;               //磁盘块数
     Cache<unsigned int, unsigned int> *pagetable; //页表
-    queue<int> frames;          //分配的内存地址
+    queue<int> *frames;          //分配的内存地址
     
 
     explicit PCB(unsigned int pid=1, unsigned int st=0,  unsigned int nt=0, int pa=0,int frameNum=0) :PID(pid),starttime(st),needtime(nt),physicalAddress(pa),frameNum(frameNum)
@@ -28,6 +28,7 @@ public:
         runtime = 0;
         endtime = 0;
         page = 0;
+        frames = new queue<int>;
     }
 
 };

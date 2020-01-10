@@ -26,7 +26,7 @@ namespace OS {
 		unsigned int pf;			//已完成进程数
 		unsigned int time; //运行时间
 		void pagedispatch(int n);
-		void releaseMemory(PCB& pcb);	//释放占用内存
+		void releaseMemory(PCB* pcb);	//释放占用内存
 	};
 
 	OperatingSystem::OperatingSystem()
@@ -63,10 +63,12 @@ namespace OS {
 					{
 						if (memory.memory[i + 3] == 0)
 						{
-							pcb.frames.push(i);
-							pcb.frames.push(i+1);
-							pcb.frames.push(i+2);
-							pcb.frames.push(i+3);
+							
+							pcb.frames->push(i);
+							pcb.frames->push(i+1);
+							pcb.frames->push(i+2);
+							pcb.frames->push(i+3);
+							//cout << pcb.frames->front() << endl;
 							memory.memory[i] = 1;
 							memory.memory[i + 1] = 1;
 							memory.memory[i+2] = 1;
@@ -90,7 +92,7 @@ namespace OS {
 
 			pagedispatch(0);
 			
-			
+
 			if (queue[0].front().needtime== queue[0].front().runtime)
 			{
 				PCB tmp = queue[0].front();
@@ -145,12 +147,13 @@ namespace OS {
 			queue[2].front().rrtmp--;
 			if (queue[2].front().needtime == queue[2].front().runtime)
 			{
-				PCB tmp = queue[2].front();
+				PCB *tmp = &queue[2].front();
+				
 				queue[2].pop();
-				tmp.endtime = tmp.runtime;
+				
+				tmp->endtime = tmp->runtime;
 
-				//cout << tmp.frames.front();
-				cout << "进程" << tmp.PID << "结束，" << "运行时间" << tmp.runtime << "；从队列3中移除" << endl;
+				cout << "进程" << tmp->PID << "结束，" << "运行时间" << tmp->runtime << "；从队列3中移除" << endl;
 
 				
 				//releaseMemory(tmp);
@@ -180,25 +183,25 @@ namespace OS {
 		}
 		else
 		{
-			if (queue[n].front().frames.empty())
+			if (queue[n].front().frames->empty())
 			{
-				queue[n].front().frames.push(queue[n].front().pagetable->returnHead());
+				queue[n].front().frames->push(queue[n].front().pagetable->returnHead());
 			}
-			queue[n].front().pagetable->insert(queue[n].front().page, queue[n].front().frames.front());
-			queue[n].front().frames.pop();
+			queue[n].front().pagetable->insert(queue[n].front().page, queue[n].front().frames->front());
+			queue[n].front().frames->pop();
 			memory.block[queue[n].front().pagetable->get(queue[n].front().page)] = disk.disk[queue[n].front().physicalAddress + queue[n].front().page];
 			queue[n].front().pagetable->dumpDebug(std::cout << "--> 缺页中断" << std::endl);
 			queue[n].front().page = memory.block[queue[n].front().pagetable->get(queue[n].front().page)];
 		}
 	}
 
-	inline void OperatingSystem::releaseMemory(PCB& pcb)
+	inline void OperatingSystem::releaseMemory(PCB* pcb)
 	{
 		for (size_t i = 0; i < 4; i++)
 		{
-			memory.memory[pcb.frames.front()] = 0;
-			cout << pcb.frames.front() << endl;
-			pcb.frames.pop();
+			memory.memory[pcb->frames->front()] = 0;
+			cout << pcb->frames->front() << endl;
+			pcb->frames->pop();
 		}	
 	}
 
