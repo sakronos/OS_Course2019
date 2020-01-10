@@ -268,13 +268,29 @@ namespace OS {
 			Value returnHead() {
 				return m_keys.head->value;
 			}
+
+			void ClearPageTable(Value (&blocks)[4]) {
+				Node<Key, Value>* n;
+				for (size_t i = 0; i < 4; i++)
+				{
+					n = m_keys.pop();
+					if (n!=0)
+					{
+						blocks[i] = n->value;
+					}
+					else
+					{
+						blocks[i] = -1;
+					}
+				}
+				clear();
+			}
 		protected:
 			size_t prune() {
 				if (m_maxSize > 0 && m_cache.size() >= (m_maxSize + m_elasticity)) {
 					size_t count = 0;
 					while (m_cache.size() > m_maxSize) {
 						Node<Key, Value>* n = m_keys.pop();
-						//
 						
 						m_cache.erase(n->key);
 						delete n;

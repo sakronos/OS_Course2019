@@ -28,6 +28,9 @@ int main(int argc, char** argv)
 		{
 			os.CreateProcess(os.allocateMemory(5, os.time, 10, 113, 10));
 		}
+		if (os.time == 4) {
+			os.CreateProcess(os.allocateMemory(6, os.time, 9, 178, 10));
+		}
 		temp=os.RunATimeSlice();
 		if (temp==1)
 		{

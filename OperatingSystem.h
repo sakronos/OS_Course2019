@@ -99,6 +99,7 @@ namespace OS {
 				queue[0].pop();
 				tmp.endtime = tmp.runtime;
 				cout << "进程" << tmp.PID << "结束，" << "运行时间" << tmp.runtime << "；从队列1中移除" << endl;
+				releaseMemory(&tmp);
 				return 1;
 			}
 			else if(queue[0].front().runtime==2)
@@ -124,6 +125,7 @@ namespace OS {
 				queue[1].pop();
 				tmp.endtime = tmp.runtime;
 				cout << "进程" << tmp.PID << "结束，" << "运行时间" << tmp.runtime << "；从队列2中移除" << endl;
+				releaseMemory(&tmp);
 				return 1;
 			}
 			else if (queue[1].front().runtime==6)
@@ -133,6 +135,7 @@ namespace OS {
 				queue[1].pop();
 				queue[2].push(tmp);
 				cout << "进程" << tmp.PID << "进入第3队列" << ",运行时间" << tmp.runtime << endl;
+				
 			}
 			
 			return 0;
@@ -156,7 +159,7 @@ namespace OS {
 				cout << "进程" << tmp->PID << "结束，" << "运行时间" << tmp->runtime << "；从队列3中移除" << endl;
 
 				
-				//releaseMemory(tmp);
+				releaseMemory(tmp);
 				
 				return 1;
 			}
@@ -197,12 +200,16 @@ namespace OS {
 
 	inline void OperatingSystem::releaseMemory(PCB* pcb)
 	{
+		unsigned int blocks[4] = { -1,-1,-1,-1 };
+		pcb->pagetable->ClearPageTable(blocks);
 		for (size_t i = 0; i < 4; i++)
 		{
-			memory.memory[pcb->frames->front()] = 0;
-			cout << pcb->frames->front() << endl;
-			pcb->frames->pop();
-		}	
+			if (blocks[i]!=-1)
+			{
+				memory.memory[blocks[i]] = 0;
+				cout << "释放第" << blocks[i] << "块内存" << endl;
+			}
+		}
 	}
 
 }
