@@ -39,8 +39,7 @@ int main(int argc, char** argv)
 			temp = 0;
 		}
 
-		if (os.pf==5)
-		{
+		if (os.pf == 6) {
 			break;
 		}
 		os.time++;
