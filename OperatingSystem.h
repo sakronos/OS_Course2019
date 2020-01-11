@@ -11,8 +11,7 @@ namespace OS {
 	{
 	private:
 		unsigned int rrslice;		//RR时间片
-		
-		
+			
 	public:
 		OperatingSystem();
 		~OperatingSystem();
@@ -27,6 +26,9 @@ namespace OS {
 		unsigned int time; //运行时间
 		void pagedispatch(int n);
 		void releaseMemory(PCB* pcb);	//释放占用内存
+		PCB* currentProcess;
+		PCB cP;
+		int currentQueueNum = 3;		//设置无进程时当前队列号为（不存在的）第4队列
 	};
 
 	OperatingSystem::OperatingSystem()
@@ -37,6 +39,7 @@ namespace OS {
 		memory = Memory();
 		disk = Disk();
 		time = 0;
+		currentProcess = nullptr;
 	}
 
 	OperatingSystem::~OperatingSystem()
@@ -73,6 +76,7 @@ namespace OS {
 							memory.memory[i + 1] = 1;
 							memory.memory[i+2] = 1;
 							memory.memory[i+3] = 1;
+							cout << i << "," << i + 1 << "," << i + 2 << "," << i + 3 << "已被分配" << endl;
 							break;
 						}
 					}
@@ -85,13 +89,132 @@ namespace OS {
 	inline int OperatingSystem::RunATimeSlice()
 	{
 		cout <<"当前时间"<< time << endl;
+		
+
+
+
+		//if (!currentProcess)
+		//{
+		//	if (!queue[0].empty())
+		//	{
+		//		currentProcess = &queue[0].front();
+
+		//		currentQueueNum = 0;
+		//		queue[0].pop();
+		//	}
+		//	else if (!queue[1].empty())
+		//	{
+		//		currentProcess = &queue[1].front();
+
+		//		currentQueueNum = 1;
+		//		queue[1].pop();
+		//	}
+		//	else if(!queue[2].empty())
+		//	{
+		//		currentProcess = &queue[2].front();
+
+		//		currentQueueNum = 2;
+		//		queue[2].pop();
+		//	}
+		//}
+
+		////
+		//if (currentQueueNum == 0) {
+		//	//No Operation
+		//}
+		//else if (currentQueueNum == 1) {
+		//	if (!queue[0].empty())
+		//	{
+
+		//		queue[1].push(*currentProcess);
+		//		currentProcess = &queue[0].front();
+
+
+		//		currentQueueNum = 0;
+		//		queue[0].pop();
+		//	}
+		//}
+		//else if (currentQueueNum == 2) {
+		//	
+		//	if (!queue[0].empty())
+		//	{
+		//		queue[2].push(*currentProcess);
+		//		currentProcess = &queue[0].front();
+
+		//	
+
+		//		currentQueueNum = 0;
+		//		queue[0].pop();
+		//	}
+		//	else if(!queue[1].empty())
+		//	{
+		//		queue[2].push(*currentProcess);
+		//		currentProcess = &queue[1].front();
+
+
+		//		currentQueueNum = 1;
+		//		queue[1].pop();
+		//	}
+
+		//}
+		//cout << "进程" << currentProcess->PID << "正在运行" << ",调用逻辑页：" << currentProcess->page << endl;
+		//currentProcess->runtime++;
+		//pagedispatch(currentQueueNum);
+		//if (currentQueueNum == 2) {
+		//	currentProcess->rrtmp--;
+		//}
+		//if (currentProcess->needtime==currentProcess->runtime)
+		//{
+		//	currentProcess->endtime = currentProcess->runtime;
+		//	cout << "进程" << currentProcess->PID << "结束，" << "运行时间" << currentProcess->runtime << "；从队列" << currentQueueNum << "中移除" << endl;
+		//	//Mark
+		//	queue[currentQueueNum].pop();
+		//	//
+		//	releaseMemory(currentProcess);
+		//	currentProcess = nullptr;
+		//	currentQueueNum = 3;
+		//	return 1;
+		//}
+		//else if (currentQueueNum == 0) {
+		//	if (currentProcess->runtime==2)
+		//	{
+		//		queue[1].push(*currentProcess);
+		//		cout << "进程" << currentProcess->PID << "进入第2队列" << ",运行时间" << currentProcess->runtime << endl;
+		//		currentProcess = nullptr;
+		//		currentQueueNum = 3;
+		//	}
+		//}
+		//else if (currentQueueNum==1)
+		//{
+		//	if (currentProcess->runtime == 6) {
+		//		queue[2].push(*currentProcess);
+		//		cout << "进程" << currentProcess->PID << "进入第3队列" << ",运行时间" << currentProcess->runtime << endl;
+		//		currentProcess = nullptr;
+		//		currentQueueNum = 3;
+		//	}
+		//}
+		//else if (currentQueueNum == 2) {
+		//	if (currentProcess->rrtmp==0)
+		//	{
+		//		currentProcess->rrtmp = rrslice;
+		//		queue[2].push(*currentProcess);
+		//		cout << "进程" << currentProcess->PID << "轮转时间片涌进，重新插回第3队列" << endl;
+		//		currentProcess = nullptr;
+		//		currentQueueNum = 3;
+		//	}
+		//}
+
+
+
+
+
 		if (!queue[0].empty())
 		{
 			cout << "进程" << queue[0].front().PID << "正在运行" <<",调用逻辑页："<<queue[0].front().page<< endl;
 			queue[0].front().runtime++;
 
 			pagedispatch(0);
-			
+			cout << "下次访问页号" << queue[0].front().page << endl;
 
 			if (queue[0].front().needtime== queue[0].front().runtime)
 			{
@@ -118,7 +241,7 @@ namespace OS {
 			queue[1].front().runtime++;
 			//访问页面
 			pagedispatch(1);
-			
+			cout << "下次访问页号" << queue[1].front().page << endl;
 			if (queue[1].front().needtime == queue[1].front().runtime)
 			{
 				PCB tmp = queue[1].front();
@@ -131,7 +254,7 @@ namespace OS {
 			else if (queue[1].front().runtime==6)
 			{
 				PCB tmp = queue[1].front();
-				tmp.rrtmp = rrslice;
+				//tmp.rrtmp = rrslice;
 				queue[1].pop();
 				queue[2].push(tmp);
 				cout << "进程" << tmp.PID << "进入第3队列" << ",运行时间" << tmp.runtime << endl;
@@ -146,7 +269,7 @@ namespace OS {
 			queue[2].front().runtime++;
 			//访问页面
 			pagedispatch(2);
-			
+			cout << "下次访问页号" << queue[2].front().page << endl;
 			queue[2].front().rrtmp--;
 			if (queue[2].front().needtime == queue[2].front().runtime)
 			{
@@ -167,6 +290,7 @@ namespace OS {
 			{
 				PCB tmp = queue[2].front();
 				tmp.rrtmp = rrslice;
+				cout << "进程" << tmp.PID << "轮转时间片涌进，重新插入第3队列" << endl;
 				queue[2].pop();
 				queue[2].push(tmp);
 			}
